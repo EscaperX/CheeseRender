@@ -1,3 +1,4 @@
 ext/eigen
 ext/SDL2
 ext/stb
+build/

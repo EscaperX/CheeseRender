@@ -9,82 +9,88 @@ add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/eigen)
 
 set (STB_INCLUDE ${CMAKE_CURRENT_SOURCE_DIR}/stb PARENT_SCOPE)
 
-########################################################
-# zlib
+# SDL2
+add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/SDL2)
+set(SDL_TEST OFF)
+set (SDL2_LIBRARY SDL2-static SDL2main PARENT_SCOPE)
+set (SDL2_INCLUDE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/SDL2/include PARENT_SCOPE)
 
-find_package (ZLIB)
-if (NOT ZLIB_FOUND)
-  # Build zlib
-  set (ZLIB_BUILD_STATIC_LIBS ON CACHE BOOL " " FORCE)
-  set (ZLIB_BUILD_SHARED_LIBS OFF CACHE BOOL " " FORCE)
-  add_subdirectory (zlib)
+# ########################################################
+# # zlib
 
-  set (ZLIB_LIBRARIES zlibstatic)
-  set (ZLIB_INCLUDE_DIRS ${CMAKE_CURRENT_SOURCE_DIR}/zlib ${CMAKE_CURRENT_BINARY_DIR}/zlib)
+# find_package (ZLIB)
+# if (NOT ZLIB_FOUND)
+#   # Build zlib
+#   set (ZLIB_BUILD_STATIC_LIBS ON CACHE BOOL " " FORCE)
+#   set (ZLIB_BUILD_SHARED_LIBS OFF CACHE BOOL " " FORCE)
+#   add_subdirectory (zlib)
 
-  # try to make openexr happy about this...
-  set (ZLIB_LIBRARY zlibstatic)
-  set (ZLIB_INCLUDE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/zlib ${CMAKE_CURRENT_BINARY_DIR}/zlib)
-  set (ZLIB_FOUND TRUE)
+#   set (ZLIB_LIBRARIES zlibstatic)
+#   set (ZLIB_INCLUDE_DIRS ${CMAKE_CURRENT_SOURCE_DIR}/zlib ${CMAKE_CURRENT_BINARY_DIR}/zlib)
 
-  set_property (TARGET zlibstatic PROPERTY FOLDER "ext")
+#   # try to make openexr happy about this...
+#   set (ZLIB_LIBRARY zlibstatic)
+#   set (ZLIB_INCLUDE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/zlib ${CMAKE_CURRENT_BINARY_DIR}/zlib)
+#   set (ZLIB_FOUND TRUE)
 
-  add_library (ZLIB::ZLIB ALIAS zlibstatic)
-  include_directories(${ZLIB_INCLUDE_DIRS})  # yuck, but so openexr/ptex can find zlib.h...
-endif ()
+#   set_property (TARGET zlibstatic PROPERTY FOLDER "ext")
 
-set (ZLIB_INCLUDE_DIRS ${ZLIB_INCLUDE_DIRS} PARENT_SCOPE)
-set (ZLIB_LIBRARIES ${ZLIB_LIBARIES} PARENT_SCOPE)
+#   add_library (ZLIB::ZLIB ALIAS zlibstatic)
+#   include_directories(${ZLIB_INCLUDE_DIRS})  # yuck, but so openexr/ptex can find zlib.h...
+# endif ()
 
-###########################################################################
-# OpenEXR
+# set (ZLIB_INCLUDE_DIRS ${ZLIB_INCLUDE_DIRS} PARENT_SCOPE)
+# set (ZLIB_LIBRARIES ${ZLIB_LIBARIES} PARENT_SCOPE)
 
-find_package (OpenEXR 2.3) # 2.3 is the first version compatible with C++17
-message (STATUS "Build OpenEXR")
+# ###########################################################################
+# # OpenEXR
 
-if (OPENEXR_FOUND)
-  message (STATUS "Found OpenEXR version ${OPENEXR_VERSION}")
-  set (OPENEXR_INCLUDE ${OPENEXR_INCLUDES}/OpenEXR ${ILMBASE_INCLUDES}/OpenEXR PARENT_SCOPE)
-  if (WIN32)
-    set (OPENEXR_LIBS ${OPENEXR_LIBRARIES} ${ZLIB_LIBRARY} PARENT_SCOPE)
-  else ()
-    set (OPENEXR_LIBS ${OPENEXR_LIBRARIES} PARENT_SCOPE)
-  endif ()
-else ()
-  message (STATUS "OpenEXR not found; building it from scratch.")
+# find_package (OpenEXR 2.3) # 2.3 is the first version compatible with C++17
+# message (STATUS "Build OpenEXR")
 
-  SET (CMAKE_POLICY_DEFAULT_CMP0077 NEW)
+# if (OPENEXR_FOUND)
+#   message (STATUS "Found OpenEXR version ${OPENEXR_VERSION}")
+#   set (OPENEXR_INCLUDE ${OPENEXR_INCLUDES}/OpenEXR ${ILMBASE_INCLUDES}/OpenEXR PARENT_SCOPE)
+#   if (WIN32)
+#     set (OPENEXR_LIBS ${OPENEXR_LIBRARIES} ${ZLIB_LIBRARY} PARENT_SCOPE)
+#   else ()
+#     set (OPENEXR_LIBS ${OPENEXR_LIBRARIES} PARENT_SCOPE)
+#   endif ()
+# else ()
+#   message (STATUS "OpenEXR not found; building it from scratch.")
 
-  set (ILMBASE_NAMESPACE_VERSIONING OFF CACHE BOOL " " FORCE)
-  set (OPENEXR_NAMESPACE_VERSIONING OFF CACHE BOOL " " FORCE)
-  set (OPENEXR_BUILD_SHARED_LIBS    OFF CACHE BOOL " " FORCE)
-  set (ILMBASE_BUILD_SHARED_LIBS    OFF CACHE BOOL " " FORCE)
-  set (PYILMBASE_ENABLE             OFF CACHE BOOL " " FORCE)
-  set (OPENEXR_BUILD_UTILS          OFF CACHE BOOL " " FORCE)
+#   SET (CMAKE_POLICY_DEFAULT_CMP0077 NEW)
 
-  add_subdirectory (openexr)
+#   set (ILMBASE_NAMESPACE_VERSIONING OFF CACHE BOOL " " FORCE)
+#   set (OPENEXR_NAMESPACE_VERSIONING OFF CACHE BOOL " " FORCE)
+#   set (OPENEXR_BUILD_SHARED_LIBS    OFF CACHE BOOL " " FORCE)
+#   set (ILMBASE_BUILD_SHARED_LIBS    OFF CACHE BOOL " " FORCE)
+#   set (PYILMBASE_ENABLE             OFF CACHE BOOL " " FORCE)
+#   set (OPENEXR_BUILD_UTILS          OFF CACHE BOOL " " FORCE)
 
-  set_property (TARGET IexMath IlmThread Half
-                Iex Imath IlmImf HalfTest IexTest
-                IlmImfExamples IlmImfTest IlmImfUtil IlmImfUtilTest ImathTest
-                PROPERTY FOLDER "ext/OpenEXR")
+#   add_subdirectory (openexr)
 
-  set (OPENEXR_INCLUDE
-    ${CMAKE_CURRENT_SOURCE_DIR}/openexr/IlmBase/Imath
-    ${CMAKE_CURRENT_SOURCE_DIR}/openexr/IlmBase/Half
-    ${CMAKE_CURRENT_SOURCE_DIR}/openexr/IlmBase/Iex
-    ${CMAKE_CURRENT_SOURCE_DIR}/openexr/OpenEXR/IlmImf
-    ${CMAKE_CURRENT_BINARY_DIR}/openexr/IlmBase/config
-    ${CMAKE_CURRENT_BINARY_DIR}/openexr/OpenEXR/config
-  PARENT_SCOPE
-  )
+#   set_property (TARGET IexMath IlmThread Half
+#                 Iex Imath IlmImf HalfTest IexTest
+#                 IlmImfExamples IlmImfTest IlmImfUtil IlmImfUtilTest ImathTest
+#                 PROPERTY FOLDER "ext/OpenEXR")
+
+#   set (OPENEXR_INCLUDE
+#     ${CMAKE_CURRENT_SOURCE_DIR}/openexr/IlmBase/Imath
+#     ${CMAKE_CURRENT_SOURCE_DIR}/openexr/IlmBase/Half
+#     ${CMAKE_CURRENT_SOURCE_DIR}/openexr/IlmBase/Iex
+#     ${CMAKE_CURRENT_SOURCE_DIR}/openexr/OpenEXR/IlmImf
+#     ${CMAKE_CURRENT_BINARY_DIR}/openexr/IlmBase/config
+#     ${CMAKE_CURRENT_BINARY_DIR}/openexr/OpenEXR/config
+#   PARENT_SCOPE
+#   )
   
 
-  if (WIN32)
-    set (OPENEXR_LIBS OpenEXR::IlmImf IlmBase::Imath IlmBase::Half ${ZLIB_LIBRARY} PARENT_SCOPE)
-  else ()
-    set (OPENEXR_LIBS OpenEXR::IlmImf IlmBase::Imath IlmBase::Half PARENT_SCOPE)
-  endif ()
-endif ()
+#   if (WIN32)
+#     set (OPENEXR_LIBS OpenEXR::IlmImf IlmBase::Imath IlmBase::Half ${ZLIB_LIBRARY} PARENT_SCOPE)
+#   else ()
+#     set (OPENEXR_LIBS OpenEXR::IlmImf IlmBase::Imath IlmBase::Half PARENT_SCOPE)
+#   endif ()
+# endif ()
 
-###########################################################################
+# ###########################################################################
