@@ -1,0 +1,36 @@
+**Light**
+
+
+Type
+====
+Only area light is supported.
+
+
+Sample
+======
+
+
+
+Sample One Light
+----------------
+If there're many light sources in the scene, an easy and quick way is randomly sample one light and multiply it by the number of lights.
+Which can be written as:
+$$
+\begin{equation}
+E(L_1(X) + L_2(X) + \dots + L_n(X)) \approx \frac{n}{\sum_{i = 1}^{n} n * L_{\text{sample}_i}(X)}
+\end{equation}
+$$
+
+
+
+<!-- Markdeep: -->
+<style class="fallback">
+    body {
+        visibility: visible;
+        white-space: pre;
+        font-family: monospace
+    }
+</style>
+<script src="markdeep.min.js" charset="utf-8"></script>
+<script src="https://morgan3d.github.io/markdeep/latest/markdeep.min.js" charset="utf-8"></script>
+<script>window.alreadyProcessedMarkdeep || (document.body.style.visibility = "visible")</script>
