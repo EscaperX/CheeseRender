@@ -138,11 +138,6 @@ struct eval_op
             Vector3f ks = eval_texture(mats.specular, vertex.uv, texture_pool);
             Vector3f ns = eval_texture(mats.spec_exponent, vertex.uv, texture_pool);
             Vector3f color = ks * (ns[0] + 2) * (0.5f / M_PI) * std::pow(alpha, ns[0]) * dotProduct(vertex.normal, dir_out);
-            ;
-            if (color[0] > 500 || color[1] > 500 || color[2] > 500)
-            {
-                std::cout << ks << " " << ns << " " << std::endl;
-            }
             return color;
         }
         return Vector3f(0.0);

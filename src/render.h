@@ -9,7 +9,7 @@
 
 struct Render_Option
 {
-    const static Render_Option& instance()
+    const static Render_Option &instance()
     {
         static Render_Option opt;
         return opt;
@@ -19,7 +19,7 @@ struct Render_Option
     int depth = 10;
     bool gbuffer = true;
     float threshold = 0.8;
-    bool sample_light = false;
+    bool sample_light = true;
 };
 
 std::vector<Imagef> render(const Scene &scene);
