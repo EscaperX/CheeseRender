@@ -20,6 +20,7 @@ struct Render_Option
     bool gbuffer = true;
     float threshold = 0.8;
     bool sample_light = true;
+    int min_depth = 5;
 };
 
 std::vector<Imagef> render(const Scene &scene);

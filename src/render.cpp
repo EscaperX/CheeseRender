@@ -116,7 +116,7 @@ Vector3f shade(const Scene &scene, Intersection &inter, Vector3f wo, pcg32_state
                     if (light_id != -1 && dotProduct(next_inter.value().normal, -scatter_dir) > 0)
                     {
                         Vector3f f_r = eval(material, wo, scatter_dir, inter, scene.textures);
-                        float cos = std::max(.0f, dotProduct(inter.normal.normalized(), scatter_dir));
+                        float cos = 1; // std::max(.0f, dotProduct(inter.normal.normalized(), scatter_dir));
                         radiance_direct = scene.lights[light_id].radiance * f_r * cos / pdf;
                     }
                 }
@@ -124,7 +124,7 @@ Vector3f shade(const Scene &scene, Intersection &inter, Vector3f wo, pcg32_state
         }
     }
     // return radiance_emission + radiance_direct;
-    if (get_random_1(rng) > opt.threshold)
+    if (depth > opt.min_depth && get_random_1(rng) > opt.threshold)
         return radiance_emission + radiance_direct;
 
     Vector3f radiance_indirect(0.0f);
@@ -142,13 +142,41 @@ Vector3f shade(const Scene &scene, Intersection &inter, Vector3f wo, pcg32_state
                 if (next_inter.has_value()) //&& next_inter.value().distance > EPSILON * scene.scale )//&& get_light_id(scene.shapes[next_inter.value().shape_id]) == -1)
                 {
                     Vector3f f_r = eval(material, wo, scatter_dir, inter, scene.textures);
-                    radiance_indirect = shade(scene, next_inter.value(), -scatter_dir, rng, depth + 1) * f_r / pdf / opt.threshold;
+                    radiance_indirect = shade(scene, next_inter.value(), -scatter_dir, rng, depth + 1) * f_r / pdf;
+                    if (depth > opt.min_depth)
+                        radiance_indirect = radiance_indirect / opt.threshold;
                 }
             }
         }
     }
 
     return radiance_emission + radiance_direct + radiance_indirect;
+}
+Vector3f shade_iterative(const Scene &scene, Intersection &inter, Vector3f wo, pcg32_state &rng, int depth = 0)
+{
+    Vector3f path_throughput = Vector3f(1.0f, 1.0f, 1.0f);
+    Vector3f Li(0.0f);
+    const auto &opt = Render_Option::instance();
+    for (int bounce = 0; bounce < opt.depth; bounce++)
+    {
+        auto &shape = scene.shapes[inter.shape_id];
+        int light_id = get_light_id(shape);
+        Vector3f radiance_emission(0.0f);
+        if (light_id != -1 && inter.outward && bounce == 0)
+        {
+            Li = Li + scene.lights[light_id].radiance;
+        }
+
+        if (bounce > opt.min_depth)
+        {
+            if (get_random_1(rng) > opt.threshold)
+            {
+                break;
+            }
+            path_throughput = path_throughput / opt.threshold;
+        }
+        if ()
+    }
 }
 Vector3f gamma_correction(Vector3f pixel, float gamma)
 {
