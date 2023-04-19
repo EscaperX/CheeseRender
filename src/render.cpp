@@ -160,7 +160,9 @@ Vector3f shade_iterative(const Scene &scene, Intersection &inter, Vector3f wo, p
     for (int bounce = 0; bounce < opt.depth; bounce++)
     {
         auto &shape = scene.shapes[inter.shape_id];
+        auto &material = scene.materials[inter.material_id];
         int light_id = get_light_id(shape);
+
         Vector3f radiance_emission(0.0f);
         if (light_id != -1 && inter.outward && bounce == 0)
         {
