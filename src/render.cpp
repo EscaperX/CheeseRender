@@ -163,10 +163,27 @@ Vector3f shade_iterative(const Scene &scene, Intersection &inter, Vector3f wo, p
         auto &material = scene.materials[inter.material_id];
         int light_id = get_light_id(shape);
 
-        Vector3f radiance_emission(0.0f);
         if (light_id != -1 && inter.outward && bounce == 0)
         {
             Li = Li + scene.lights[light_id].radiance;
+        }
+
+        auto [emission, light_point, light_normal, light_pdf] = sample_light(scene.lights, scene.shapes, rng);
+        Vector3f obj2light = light_point - inter.position;
+        Vector3f obj2light_dir = obj2light.normalized();
+        float dist = obj2light.norm();
+        Vector3f biased_position = inter.position + inter.normal * scene.scale * (inter.outward ? EPSILON : -EPSILON);
+
+        auto t = intersect(scene, Ray(biased_position, obj2light_dir));
+        // if (t.has_value())std::cerr << t.value().distance << std::endl;
+        if (t.has_value() && (light_point - t.value().position).norm() < EPSILON * scene.scale * 10)
+        {
+            Vector3f f_r = eval(material, wo, obj2light_dir, inter, scene.textures);
+            float r2 = dist * dist;
+            float cosA = std::max(0.0f, dotProduct(inter.normal.normalized(), obj2light_dir));
+            float cosB = std::max(0.0f, dotProduct(light_normal.normalized(), -obj2light_dir));
+
+            Li = Li + path_throughput * emission * f_r * cosA * cosB / r2 / light_pdf;
         }
 
         if (bounce > opt.min_depth)
@@ -177,8 +194,29 @@ Vector3f shade_iterative(const Scene &scene, Intersection &inter, Vector3f wo, p
             }
             path_throughput = path_throughput / opt.threshold;
         }
-        if ()
+
+        Vector2f rnd_uv{get_random_1(rng), get_random_1(rng)};
+        auto [scatter_dir_op, pdf] = sample_bsdf(material, wo, inter, scene.textures, rnd_uv);
+        if (scatter_dir_op.has_value() && pdf > EPSILON)
+        {
+            auto scatter_dir = scatter_dir_op.value().normalized();
+            // float pdf = pdf_sample_bsdf(material, wo, scatter_dir, inter, scene.textures);
+            auto next_inter = intersect(scene, Ray(inter.position + inter.normal * scene.scale * (inter.outward ? EPSILON : -EPSILON), scatter_dir));
+            if (next_inter.has_value()) //&& next_inter.value().distance > EPSILON * scene.scale )//&& get_light_id(scene.shapes[next_inter.value().shape_id]) == -1)
+            {
+                Vector3f f_r = eval(material, wo, scatter_dir, inter, scene.textures);
+                wo = -scatter_dir;
+                path_throughput = path_throughput * f_r / pdf;
+                inter = next_inter.value();
+            }
+            else
+                break;
+        }
+        else
+            break;
     }
+    // std::cout << Li << std::endl;
+    return Li;
 }
 Vector3f gamma_correction(Vector3f pixel, float gamma)
 {
@@ -209,20 +247,17 @@ std::vector<Imagef> render(const Scene &scene)
                 int width = scene.camera.width;
                 int enter = thread_id * block_height;
                 int exit = (thread_id == opt.thread_num - 1) ? height : (thread_id + 1) * block_height;
-                for (int j = enter; j < exit; ++j)
+                for (int j = enter; j <= exit; ++j)
                 {
-                    for (int i = 0; i < width; ++i) {
+                    for (int i = 0; i <= width; ++i) {
                         Vector3f pixel(0.0f), depth(0.0f), normal(0.0f);
                         for (int sp = 0; sp < opt.spp; sp++)
                         {
                             auto& camera = scene.camera;
-                            if (i == 654 && j == 949) {
-                                puts("fucl");
-                            }
                             Ray ray = sample_ray(camera, Vector2f{ 1.0f * i, 1.0f * j } + Vector2f{ next_pcg32_real<float>(rng), next_pcg32_real<float>(rng) });
                             auto v = intersect(scene, ray);
                             if (!v.has_value()) continue;
-                            Vector3f color = shade(scene, v.value(), -ray.direction, rng);
+                            Vector3f color = shade_iterative(scene, v.value(), -ray.direction, rng);
                             if (std::max({ color[0], color[1], color[2] }) > scene.max_radiance + EPSILON) continue;
                             pixel = pixel + color * (1.0f / opt.spp);
                             if (opt.gbuffer)

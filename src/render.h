@@ -15,7 +15,7 @@ struct Render_Option
         return opt;
     }
     int thread_num = 20;
-    int spp = 64;
+    int spp = 32;
     int depth = 10;
     bool gbuffer = true;
     float threshold = 0.8;
