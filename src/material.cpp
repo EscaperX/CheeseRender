@@ -50,11 +50,15 @@ std::optional<Vector3f> refract(const Vector3f &wi, const Vector3f &normal, floa
 
 inline Vector3f sample_cos_hemisphere(const Vector2f &rnd_param)
 {
-    float phi = 2 * M_PI * rnd_param.x;
-    float tmp = sqrt(std::clamp(1 - rnd_param.y, 0.0f, 1.0f));
-    return Vector3f{
-        cos(phi) * tmp, sin(phi) * tmp,
-        sqrt(std::clamp(rnd_param.y, 0.0f, 1.0f))};
+    float r = std::sqrt(std::max(0.f, 1.f - rnd_param.x * rnd_param.x));
+    float phi = 2 * M_PI * rnd_param.y;
+    return Vector3f{std::cos(phi) * r, std::sin(phi) * r, rnd_param.x};
+
+    // float phi = 2 * M_PI * rnd_param.x;
+    // float tmp = sqrt(std::clamp(1 - rnd_param.y, 0.0f, 1.0f));
+    // return Vector3f{
+    //     cos(phi) * tmp, sin(phi) * tmp,
+    //     sqrt(std::clamp(rnd_param.y, 0.0f, 1.0f))};
     /*float u = rnd_param.x, v = rnd_param.y;
     float theta = 2 * M_PI * u;
         float phi = acos(2 * v - 1.0);
@@ -188,7 +192,7 @@ struct sample_bsdf_op
         }
         Coordinate coord(vertex.normal);
         Vector3f v = (to_world(coord, sample_cos_hemisphere(uv)).normalized());
-        return {v, dotProduct(v, vertex.normal) / M_PI};
+        return {v, 0.5 * INV_PI};
     }
     std::tuple<std::optional<Vector3f>, float> operator()(const Phong &bsdf) const
     {
@@ -198,7 +202,7 @@ struct sample_bsdf_op
         }
         Coordinate coord(vertex.normal);
         Vector3f v = (to_world(coord, sample_cos_hemisphere(uv)).normalized());
-        return {v, dotProduct(v, vertex.normal) / M_PI};
+        return {v, 0.5 * INV_PI};
     }
     std::tuple<std::optional<Vector3f>, float> operator()(const Specular &bsdf) const
     {
