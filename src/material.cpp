@@ -253,7 +253,7 @@ struct pdf_sample_bsdf_op
             return 0.0f;
         }
 
-        return fmax(dotProduct(vertex.normal, dir_out), 0.0f) / M_PI;
+        return 0.5f / M_PI;
     }
     float operator()(const Phong &bsdf) const
     {
@@ -263,7 +263,6 @@ struct pdf_sample_bsdf_op
             return 0.0f;
         }
 
-        return fmax(dotProduct(vertex.normal.normalized(), dir_out.normalized()), 0.0f) / M_PI;
         return 0.5f / M_PI;
     }
     float operator()(const Transparent &bsdf) const
@@ -274,7 +273,6 @@ struct pdf_sample_bsdf_op
             return 0.0f;
         }
 
-        return fmax(dotProduct(vertex.normal.normalized(), dir_out.normalized()), 0.0f) / M_PI;
         return 0.5f / M_PI;
     }
     float operator()(const Specular &bsdf) const
@@ -285,7 +283,6 @@ struct pdf_sample_bsdf_op
             return 0.0f;
         }
 
-        return fmax(dotProduct(vertex.normal.normalized(), dir_out.normalized()), 0.0f) / M_PI;
         return 0.5f / M_PI;
     }
     const Vector3f &dir_in;
