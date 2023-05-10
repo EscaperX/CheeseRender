@@ -12,7 +12,7 @@ int main()
     path.insert({"stairscase", "../../assets/stairscase/stairscase.xml"});
     path.insert({"veach-mis", "../../assets/veach-mis/veach-mis.xml"});
     path.insert({"veach-mis-2", "../../assets/veach-mis-2/veach-mis.xml"});
-    std::string scene_name = "cornell-dragon";
+    std::string scene_name = "cornell-simple";
     // auto scene = parse_scene("../../assets/cornell-simple/cornell-simple.xml");
     auto scene = parse_scene(path[scene_name]);
     // auto scene = parse_scene("../../assets/cornell-box-s/cornell-box.xml");
