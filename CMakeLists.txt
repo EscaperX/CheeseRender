@@ -13,3 +13,14 @@ add_subdirectory(3rdparty)
 
 
 add_subdirectory(src)
+
+find_package(Threads REQUIRED)
+
+include_directories( ${NLOHMANN_INCLUDE_DIR} ${TINYEXR_INCLUDE_DIR} ${PUGI_INCLUDE_DIR} ${STB_INCLUDE_DIR} ${TINYOBJLOADER_INCLUDE_DIR} )
+
+add_executable(cheese main.cpp ${CHEESE_BASE})
+MESSAGE(STATUS "PUGI_INCLUDE_DIR = ${TINYOBJLOADER_LIBRARY_DIR}")
+target_include_directories(cheese PRIVATE include/ ${CMAKE_CURRENT_SOURCE_DIR})# ${3RDPARTY_INCLUDE})
+target_link_libraries(cheese  PUGI_XML tinyobjloader  Threads::Threads tiny_exr_lib)# GLAD_LIB glfw)# Eigen3::Eigen)
+target_link_directories(cheese PRIVATE ${TINYOBJLOADER_LIBRARY_DIR})
+

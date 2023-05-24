@@ -18,7 +18,7 @@ struct Render_Option
     int spp = 32;
     int depth = 10;
     bool gbuffer = true;
-    float threshold = 0.8;
+    float threshold = 0.8f;
     bool sample_light = true;
     int min_depth = 5;
 };
