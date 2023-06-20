@@ -113,44 +113,12 @@ bool parse_obj(const std::filesystem::path &path, std::vector<Shape> &shape, std
 }
 Scene parse_scene(const std::filesystem::path &path)
 {
-    Camera camera;
-    std::vector<Shape> shapes;
-    std::vector<Material> materials;
-    std::vector<Light> lights;
-    std::vector<Image> textures;
-
-    std::map<std::string, Light> light_map;
-    std::cerr << "Current working directory: " << std::filesystem::current_path() << std::endl;
-
     if (ends_with(path.string(), "xml"))
     {
-        pugi::xml_document file;
-        pugi::xml_parse_result result = file.load_file(path.c_str());
-
-        if (!result)
-        {
-            std::cerr << "Error description: " << result.description() << std::endl;
-            std::cerr << "Error offset: " << result.offset << std::endl;
-            throw std::runtime_error("XML Parsing Error!");
-        }
-        for (auto child : file.children())
-        {
-            std::string name = child.name();
-            if (name == "camera")
-                camera = parse_camera(child);
-            if (name == "light")
-            {
-                Light l = parse_light(child);
-                light_map[l.name] = l;
-            }
-        }
-
-        std::filesystem::path obj_path(path);
-        obj_path.replace_extension(".obj");
-        parse_obj_xml(obj_path, shapes, materials, textures, lights, light_map);
+        return parse_scene_xml(path);
     }
     else if (ends_with(path.string(), "json"))
     {
+        return parse_scene_json(path);
     }
-    return Scene(camera, shapes, materials, lights, textures);
 }

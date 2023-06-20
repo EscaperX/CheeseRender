@@ -9,7 +9,7 @@
 
 struct Render_Option
 {
-    const static Render_Option &instance()
+    static Render_Option &instance()
     {
         static Render_Option opt;
         return opt;

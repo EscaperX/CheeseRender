@@ -19,6 +19,7 @@ struct Scene
     std::vector<Shape> shapes;
     std::vector<Material> materials;
     std::vector<Light> lights;
+    int envmap_id = -1;
     std::vector<Image> textures;
     Camera camera;
     std::vector<std::shared_ptr<BVH_Node>> BVH_root;
@@ -27,4 +28,6 @@ struct Scene
 };
 
 void info(const Scene &scene);
+bool has_envmap(const Scene &scene);
+Light get_envmap(const Scene &scene);
 #endif
